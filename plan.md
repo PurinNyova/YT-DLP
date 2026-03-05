@@ -99,6 +99,21 @@ A sleek, modern web application that leverages **yt-dlp** to download YouTube vi
 - [x] Gradient accent colors, smooth transitions
 - [x] Fully responsive (mobile-friendly)
 
+### 7. User-Specific History (Cookie-Based)
+
+- [x] Generate a unique user ID (UUID) on first visit and store it in a persistent cookie
+- [x] Send user ID cookie with every API request
+- [x] Add `user_id` column to downloads table
+- [x] Associate each download with the requesting user's cookie ID
+- [x] Filter `/api/downloads` history by user ID — history is per-user, not global
+
+### 8. Download Deduplication / File Reuse
+
+- [ ] Before starting a new download, check if a completed download with the same `video_url`, `format`, and `quality` already exists in the database
+- [ ] If a matching file exists on disk, create a new download record pointing to the existing file instead of re-downloading
+- [ ] Skip the yt-dlp invocation entirely when reusing, mark the new record as completed immediately
+- [ ] Saves disk space and bandwidth — no duplicate files for the same video+quality combo
+
 ### 7. Integration & Testing
 
 - [x] Wire frontend to backend API

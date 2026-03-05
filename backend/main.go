@@ -50,6 +50,7 @@ func main() {
 
 	// Router
 	r := gin.Default()
+	r.SetTrustedProxies([]string{"http://frontend:80"})
 
 	// CORS
 	allowedOrigins := []string{
@@ -57,6 +58,8 @@ func main() {
 		"http://localhost:80",
 		"http://localhost:5173",
 		"http://localhost:3000",
+		"http://localhost:4300",
+		"http://localhost:4301",
 	}
 	if extra := os.Getenv("CORS_ORIGINS"); extra != "" {
 		for _, o := range strings.Split(extra, ",") {
@@ -72,6 +75,7 @@ func main() {
 
 	// API routes
 	api := r.Group("/api")
+	api.Use(handlers.UserIDMiddleware())
 	{
 		api.GET("/info", h.GetInfo)
 		api.POST("/download", h.StartDownload)

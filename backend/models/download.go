@@ -4,6 +4,7 @@ import "time"
 
 type Download struct {
 	ID           uint       `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserID       string     `json:"user_id" gorm:"size:36;index"`
 	VideoURL     string     `json:"video_url" gorm:"size:512;not null"`
 	Title        string     `json:"title" gorm:"size:512"`
 	Format       string     `json:"format" gorm:"type:enum('audio','video');not null"`

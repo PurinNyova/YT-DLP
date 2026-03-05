@@ -55,7 +55,7 @@ export default function Navbar() {
               fontWeight="extrabold"
               letterSpacing="tight"
             >
-              YT-DLP
+              Nyova Downloader
             </Heading>
           </ChakraLink>
 

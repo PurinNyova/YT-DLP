@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./backend/.env
+    environment:
+      PORT: "8080"
     volumes:
       - downloads:/app/downloads
     ports:
@@ -17,7 +19,7 @@ services:
       - default
       - sql_default
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4301/api/downloads"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/downloads"]
       interval: 30s
       timeout: 10s
       retries: 5

@@ -115,8 +115,9 @@ func (s *YTDLPService) FetchInfo(url string) (*models.VideoInfo, error) {
 }
 
 // StartDownload creates a DB record and starts the download in a goroutine
-func (s *YTDLPService) StartDownload(req models.DownloadRequest) (*models.Download, error) {
+func (s *YTDLPService) StartDownload(req models.DownloadRequest, userID string) (*models.Download, error) {
 	dl := models.Download{
+		UserID:   userID,
 		VideoURL: req.URL,
 		Format:   req.Format,
 		Quality:  req.Quality,
@@ -245,15 +246,16 @@ func (s *YTDLPService) GetDownload(id uint) (*models.Download, error) {
 	return &dl, nil
 }
 
-// ListDownloads returns recent downloads, paginated
-func (s *YTDLPService) ListDownloads(page, pageSize int) ([]models.Download, int64, error) {
+// ListDownloads returns recent downloads for a specific user, paginated
+func (s *YTDLPService) ListDownloads(page, pageSize int, userID string) ([]models.Download, int64, error) {
 	var downloads []models.Download
 	var total int64
 
-	s.DB.Model(&models.Download{}).Count(&total)
+	query := s.DB.Model(&models.Download{}).Where("user_id = ?", userID)
+	query.Count(&total)
 
 	offset := (page - 1) * pageSize
-	if err := s.DB.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&downloads).Error; err != nil {
+	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&downloads).Error; err != nil {
 		return nil, 0, err
 	}
 

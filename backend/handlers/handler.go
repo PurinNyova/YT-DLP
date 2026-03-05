@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"crypto/rand"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -16,6 +17,27 @@ type Handler struct {
 
 func NewHandler(service *services.YTDLPService) *Handler {
 	return &Handler{Service: service}
+}
+
+// UserIDMiddleware ensures every request has a user_id cookie
+func UserIDMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := c.Cookie("user_id")
+		if err != nil || userID == "" {
+			userID = generateUUID()
+			c.SetCookie("user_id", userID, 365*24*3600, "/", "", false, false)
+		}
+		c.Set("user_id", userID)
+		c.Next()
+	}
+}
+
+func generateUUID() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	b[6] = (b[6] & 0x0f) | 0x40 // version 4
+	b[8] = (b[8] & 0x3f) | 0x80 // variant 10
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
 // GetInfo handles GET /api/info?url=<youtube_url>
@@ -43,7 +65,8 @@ func (h *Handler) StartDownload(c *gin.Context) {
 		return
 	}
 
-	dl, err := h.Service.StartDownload(req)
+	userID, _ := c.Get("user_id")
+	dl, err := h.Service.StartDownload(req, userID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -123,7 +146,8 @@ func (h *Handler) ListDownloads(c *gin.Context) {
 		pageSize = 20
 	}
 
-	downloads, total, err := h.Service.ListDownloads(page, pageSize)
+	userID, _ := c.Get("user_id")
+	downloads, total, err := h.Service.ListDownloads(page, pageSize, userID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
