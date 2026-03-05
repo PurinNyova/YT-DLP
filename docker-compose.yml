@@ -12,7 +12,7 @@ services:
     volumes:
       - downloads:/app/downloads
     ports:
-      - "8081:8080"
+      - "4301:8080"
     networks:
       - default
       - sql_default
@@ -31,7 +31,7 @@ services:
     container_name: ytdlp-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "4300:80"
     depends_on:
       backend:
         condition: service_healthy
