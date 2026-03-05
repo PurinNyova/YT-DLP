@@ -17,7 +17,7 @@ services:
       - default
       - sql_default
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8081/api/downloads"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:4301/api/downloads"]
       interval: 30s
       timeout: 10s
       retries: 5
