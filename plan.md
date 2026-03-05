@@ -39,14 +39,14 @@ A sleek, modern web application that leverages **yt-dlp** to download YouTube vi
 ### 1. Project Scaffolding
 
 - [x] Initialize Git repository with MIT license
-- [ ] Create Go module (`backend/`)
-- [ ] Create React + Vite project (`frontend/`)
-- [ ] Configure Tailwind CSS + Chakra UI in frontend
+- [x] Create Go module (`backend/`)
+- [x] Create React + Vite project (`frontend/`)
+- [x] Configure Tailwind CSS + Chakra UI in frontend
 
 ### 2. Database Schema & Setup
 
-- [ ] Create `ytdlp` database
-- [ ] Create `downloads` table:
+- [x] Create `ytdlp` database
+- [x] Create `downloads` table:
   - `id` — INT, PK, AUTO_INCREMENT
   - `video_url` — VARCHAR(512)
   - `title` — VARCHAR(512)
@@ -61,55 +61,55 @@ A sleek, modern web application that leverages **yt-dlp** to download YouTube vi
 
 ### 3. Backend — Go API (Gin)
 
-- [ ] **GET `/api/info`** — Accept `?url=<youtube_url>`, run `yt-dlp --dump-json` to return video metadata (title, thumbnail, available formats/qualities)
-- [ ] **POST `/api/download`** — Accept `{ url, format, quality }`, queue a download via yt-dlp, store record in DB, return download ID
-- [ ] **GET `/api/download/:id/status`** — Return current status of a download
-- [ ] **GET `/api/download/:id/file`** — Serve the downloaded file to the client
-- [ ] **GET `/api/downloads`** — List recent downloads (paginated)
-- [ ] Middleware: CORS, request logging, error recovery
+- [x] **GET `/api/info`** — Accept `?url=<youtube_url>`, run `yt-dlp --dump-json` to return video metadata (title, thumbnail, available formats/qualities)
+- [x] **POST `/api/download`** — Accept `{ url, format, quality }`, queue a download via yt-dlp, store record in DB, return download ID
+- [x] **GET `/api/download/:id/status`** — Return current status of a download
+- [x] **GET `/api/download/:id/file`** — Serve the downloaded file to the client
+- [x] **GET `/api/downloads`** — List recent downloads (paginated)
+- [x] Middleware: CORS, request logging, error recovery
 
 ### 4. Backend — yt-dlp Integration
 
-- [ ] Write a Go service that shells out to `yt-dlp` with appropriate flags
+- [x] Write a Go service that shells out to `yt-dlp` with appropriate flags
   - Audio: `yt-dlp -x --audio-format mp3 --audio-quality <quality> -o <output> <url>`
   - Video: `yt-dlp -f <format_id> -o <output> <url>`
-- [ ] Parse yt-dlp JSON output for available formats
-- [ ] Handle progress tracking and error capture
+- [x] Parse yt-dlp JSON output for available formats
+- [x] Handle progress tracking and error capture
 
 ### 5. Frontend — Pages & Components
 
-- [ ] **Home Page (`/`)**
+- [x] **Home Page (`/`)**
   - URL input bar (centered, prominent)
   - "Fetch Info" button
-- [ ] **Format Selection Panel**
+- [x] **Format Selection Panel**
   - Displays video thumbnail and title
   - Toggle: Audio / Video
   - Quality dropdown (populated from API)
   - "Download" button
-- [ ] **Download Status Card**
+- [x] **Download Status Card**
   - Progress indicator (pending → processing → completed)
   - Download link when ready
-- [ ] **History Page (`/history`)**
+- [x] **History Page (`/history`)**
   - Table of recent downloads with status badges
 
 ### 6. Frontend — Styling
 
-- [ ] Dark-mode-first theme using Chakra UI color mode
-- [ ] Tailwind utilities for spacing, layout, responsiveness
-- [ ] Gradient accent colors, smooth transitions
-- [ ] Fully responsive (mobile-friendly)
+- [x] Dark-mode-first theme using Chakra UI color mode
+- [x] Tailwind utilities for spacing, layout, responsiveness
+- [x] Gradient accent colors, smooth transitions
+- [x] Fully responsive (mobile-friendly)
 
 ### 7. Integration & Testing
 
-- [ ] Wire frontend to backend API
-- [ ] End-to-end test: paste URL → fetch info → select format → download
-- [ ] Error handling UI (invalid URL, yt-dlp failure, network errors)
+- [x] Wire frontend to backend API
+- [x] End-to-end test: paste URL → fetch info → select format → download
+- [x] Error handling UI (invalid URL, yt-dlp failure, network errors)
 
 ### 8. Deployment Readiness
 
-- [ ] Dockerfile for backend
-- [ ] Environment variable configuration (`.env.example`)
-- [ ] README with setup and usage instructions
+- [x] Dockerfile for backend
+- [x] Environment variable configuration (`.env.example`)
+- [x] README with setup and usage instructions
 
 ---
 
