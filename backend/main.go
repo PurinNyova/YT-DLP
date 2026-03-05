@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/PurinNyova/YT-DLP/backend/handlers"
 	"github.com/PurinNyova/YT-DLP/backend/models"
@@ -51,8 +52,19 @@ func main() {
 	r := gin.Default()
 
 	// CORS
+	allowedOrigins := []string{
+		"http://localhost",
+		"http://localhost:80",
+		"http://localhost:5173",
+		"http://localhost:3000",
+	}
+	if extra := os.Getenv("CORS_ORIGINS"); extra != "" {
+		for _, o := range strings.Split(extra, ",") {
+			allowedOrigins = append(allowedOrigins, strings.TrimSpace(o))
+		}
+	}
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:3000"},
+		AllowOrigins:     allowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 		AllowCredentials: true,

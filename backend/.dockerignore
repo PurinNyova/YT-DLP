@@ -1,0 +1,6 @@
+downloads/
+.env
+*.md
+.git
+tmp/
+*.exe
