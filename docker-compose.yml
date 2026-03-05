@@ -1,0 +1,59 @@
+services:
+
+  # ── Backend ──────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ytdlp-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      - downloads:/app/downloads
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/downloads"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # ── Frontend (nginx) ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ytdlp-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ── Optional: local MySQL (uncomment to use instead of external DB) ───────
+  # db:
+  #   image: mysql:8.4
+  #   container_name: ytdlp-db
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: secure_root_password
+  #     MYSQL_DATABASE: ytdlp
+  #   ports:
+  #     - "3307:3306"
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+  #     - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 10
+
+volumes:
+  downloads:
+    driver: local
+  # db_data:          # uncomment if using local db service above
+  #   driver: local

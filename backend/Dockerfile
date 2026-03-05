@@ -1,4 +1,4 @@
-# Build stage
+# ── Build stage ─────────────────────────────────────────────────────────────
 FROM golang:1.21-alpine AS builder
 
 RUN apk add --no-cache gcc musl-dev
@@ -10,20 +10,19 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o server .
 
-# Runtime stage
-FROM alpine:3.19
+# ── Runtime stage ────────────────────────────────────────────────────────────
+FROM python:3.12-slim
 
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    ffmpeg \
-    ca-certificates \
-    && pip3 install --break-system-packages yt-dlp
+# ffmpeg + yt-dlp
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ffmpeg \
+        ca-certificates \
+    && pip install --no-cache-dir yt-dlp \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY --from=builder /app/server .
-COPY .env.example .env
 
 RUN mkdir -p /app/downloads
 
