@@ -114,8 +114,38 @@ func (s *YTDLPService) FetchInfo(url string) (*models.VideoInfo, error) {
 	return info, nil
 }
 
-// StartDownload creates a DB record and starts the download in a goroutine
+// StartDownload creates a DB record and starts the download in a goroutine.
+// If a completed download with the same video_url, format, and quality already
+// exists and the file is still on disk, reuse it instead of re-downloading.
 func (s *YTDLPService) StartDownload(req models.DownloadRequest, userID string) (*models.Download, error) {
+	// Check for an existing completed download with the same video+format+quality
+	var existing models.Download
+	err := s.DB.Where("video_url = ? AND format = ? AND quality = ? AND status = ?",
+		req.URL, req.Format, req.Quality, "completed").
+		First(&existing).Error
+
+	if err == nil && existing.FilePath != "" {
+		// Verify the file still exists on disk
+		if _, statErr := os.Stat(existing.FilePath); statErr == nil {
+			now := time.Now()
+			dl := models.Download{
+				UserID:      userID,
+				VideoURL:    req.URL,
+				Format:      req.Format,
+				Quality:     req.Quality,
+				Title:       existing.Title,
+				FilePath:    existing.FilePath,
+				FileSize:    existing.FileSize,
+				Status:      "completed",
+				CompletedAt: &now,
+			}
+			if err := s.DB.Create(&dl).Error; err != nil {
+				return nil, fmt.Errorf("failed to create download record: %w", err)
+			}
+			return &dl, nil
+		}
+	}
+
 	dl := models.Download{
 		UserID:   userID,
 		VideoURL: req.URL,

@@ -109,10 +109,10 @@ A sleek, modern web application that leverages **yt-dlp** to download YouTube vi
 
 ### 8. Download Deduplication / File Reuse
 
-- [ ] Before starting a new download, check if a completed download with the same `video_url`, `format`, and `quality` already exists in the database
-- [ ] If a matching file exists on disk, create a new download record pointing to the existing file instead of re-downloading
-- [ ] Skip the yt-dlp invocation entirely when reusing, mark the new record as completed immediately
-- [ ] Saves disk space and bandwidth — no duplicate files for the same video+quality combo
+- [x] Before starting a new download, check if a completed download with the same `video_url`, `format`, and `quality` already exists in the database
+- [x] If a matching file exists on disk, create a new download record pointing to the existing file instead of re-downloading
+- [x] Skip the yt-dlp invocation entirely when reusing, mark the new record as completed immediately
+- [x] Saves disk space and bandwidth — no duplicate files for the same video+quality combo
 
 ### 7. Integration & Testing
 
