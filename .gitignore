@@ -42,3 +42,6 @@ npm-debug.log*
 
 # Downloads folder (runtime)
 /backend/downloads/
+
+# Local planning notes
+plan.md
