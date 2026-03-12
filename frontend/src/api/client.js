@@ -6,13 +6,13 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export const fetchVideoInfo = async (url) => {
-  const response = await api.get('/info', { params: { url } });
+export const fetchVideoInfo = async (url, platform = 'youtube') => {
+  const response = await api.get('/info', { params: { url, platform } });
   return response.data;
 };
 
-export const startDownload = async (url, format, quality) => {
-  const response = await api.post('/download', { url, format, quality });
+export const startDownload = async (url, format, quality, platform = 'youtube') => {
+  const response = await api.post('/download', { url, format, quality, platform });
   return response.data;
 };
 

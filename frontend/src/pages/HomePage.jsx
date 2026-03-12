@@ -21,10 +21,14 @@ import {
   Icon,
   Progress,
 } from '@chakra-ui/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { FiSearch, FiMusic, FiVideo, FiDownload, FiCheck, FiX } from 'react-icons/fi';
 import { fetchVideoInfo, startDownload, getDownloadStatus, getDownloadFileURL } from '../api/client';
+import { PLATFORMS } from '../App';
 
-export default function HomePage() {
+const MotionBox = motion(Box);
+
+export default function HomePage({ platform = 'youtube' }) {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [videoInfo, setVideoInfo] = useState(null);
@@ -33,16 +37,27 @@ export default function HomePage() {
   const [downloadState, setDownloadState] = useState(null); // { id, status }
   const toast = useToast();
 
+  const platformInfo = PLATFORMS[platform] || PLATFORMS.youtube;
+
+  // Reset form when platform changes
+  useEffect(() => {
+    setUrl('');
+    setVideoInfo(null);
+    setDownloadState(null);
+    setFormatType('video');
+    setSelectedQuality('');
+  }, [platform]);
+
   const handleFetchInfo = async () => {
     if (!url.trim()) {
-      toast({ title: 'Please enter a YouTube URL', status: 'warning', duration: 3000 });
+      toast({ title: `Please enter a ${platformInfo.name} URL`, status: 'warning', duration: 3000 });
       return;
     }
     setLoading(true);
     setVideoInfo(null);
     setDownloadState(null);
     try {
-      const info = await fetchVideoInfo(url.trim());
+      const info = await fetchVideoInfo(url.trim(), platform);
       setVideoInfo(info);
       // Auto-select first quality
       const formats = info.formats.filter((f) => f.type === formatType);
@@ -76,7 +91,7 @@ export default function HomePage() {
   const handleDownload = async () => {
     if (!selectedQuality) return;
     try {
-      const result = await startDownload(url.trim(), formatType, selectedQuality);
+      const result = await startDownload(url.trim(), formatType, selectedQuality, platform);
       setDownloadState({ id: result.id, status: 'pending' });
       toast({ title: 'Download started!', status: 'info', duration: 2000 });
     } catch (err) {
@@ -144,7 +159,23 @@ export default function HomePage() {
             fontWeight="extrabold"
             mb={2}
           >
-            Download YouTube Videos
+            Download{' '}
+            <Box as="span" position="relative" display="inline-block">
+              <AnimatePresence mode="wait">
+                <MotionBox
+                  as="span"
+                  key={platform}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -20, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  display="inline-block"
+                >
+                  {platformInfo.name}
+                </MotionBox>
+              </AnimatePresence>
+            </Box>{' '}
+            Videos
           </Heading>
           <Text color="gray.400" fontSize="lg">
             Paste a link, pick your format, and download.
@@ -160,7 +191,7 @@ export default function HomePage() {
                   <Icon as={FiSearch} color="gray.500" />
                 </InputLeftElement>
                 <Input
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder={platformInfo.placeholder}
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleFetchInfo()}
