@@ -45,8 +45,10 @@ type ytdlpRawInfo struct {
 	Formats   []ytdlpRawFormat `json:"formats"`
 }
 
-// FetchInfo runs yt-dlp --dump-json and returns parsed video information
-func (s *YTDLPService) FetchInfo(url string) (*models.VideoInfo, error) {
+// FetchInfo runs yt-dlp --dump-json and returns parsed video information.
+// For non-YouTube platforms that may not expose granular format lists,
+// it falls back to sensible defaults (e.g. "best" quality).
+func (s *YTDLPService) FetchInfo(url string, platform string) (*models.VideoInfo, error) {
 	cmd := exec.Command("yt-dlp", "--dump-json", "--no-warnings", url)
 	output, err := cmd.Output()
 	if err != nil {
@@ -111,6 +113,37 @@ func (s *YTDLPService) FetchInfo(url string) (*models.VideoInfo, error) {
 		}
 	}
 
+	// For platforms like Instagram/TikTok/X that may not expose separate
+	// audio/video streams, ensure at least a "best" video option exists.
+	if platform != "youtube" {
+		hasVideo := false
+		hasAudio := false
+		for _, f := range info.Formats {
+			if f.Type == "video" {
+				hasVideo = true
+			}
+			if f.Type == "audio" {
+				hasAudio = true
+			}
+		}
+		if !hasVideo {
+			info.Formats = append(info.Formats, models.FormatInfo{
+				FormatID:  "best",
+				Extension: "mp4",
+				Type:      "video",
+				Quality:   "best",
+			})
+		}
+		if !hasAudio {
+			info.Formats = append(info.Formats, models.FormatInfo{
+				FormatID:  "bestaudio",
+				Extension: "mp3",
+				Type:      "audio",
+				Quality:   "best",
+			})
+		}
+	}
+
 	return info, nil
 }
 
@@ -118,6 +151,11 @@ func (s *YTDLPService) FetchInfo(url string) (*models.VideoInfo, error) {
 // If a completed download with the same video_url, format, and quality already
 // exists and the file is still on disk, reuse it instead of re-downloading.
 func (s *YTDLPService) StartDownload(req models.DownloadRequest, userID string) (*models.Download, error) {
+	platform := req.Platform
+	if platform == "" {
+		platform = "youtube"
+	}
+
 	// Check for an existing completed download with the same video+format+quality
 	var existing models.Download
 	err := s.DB.Where("video_url = ? AND format = ? AND quality = ? AND status = ?",
@@ -131,9 +169,10 @@ func (s *YTDLPService) StartDownload(req models.DownloadRequest, userID string) 
 			dl := models.Download{
 				UserID:      userID,
 				VideoURL:    req.URL,
+				Title:       existing.Title,
+				Platform:    platform,
 				Format:      req.Format,
 				Quality:     req.Quality,
-				Title:       existing.Title,
 				FilePath:    existing.FilePath,
 				FileSize:    existing.FileSize,
 				Status:      "completed",
@@ -149,6 +188,7 @@ func (s *YTDLPService) StartDownload(req models.DownloadRequest, userID string) 
 	dl := models.Download{
 		UserID:   userID,
 		VideoURL: req.URL,
+		Platform: platform,
 		Format:   req.Format,
 		Quality:  req.Quality,
 		Status:   "pending",
@@ -259,6 +299,9 @@ func (s *YTDLPService) audioQualityFlag(quality string) string {
 }
 
 func (s *YTDLPService) videoFormatSpec(quality string) string {
+	if quality == "best" {
+		return "bestvideo+bestaudio/best"
+	}
 	// quality is like "1080p" — extract height
 	height := strings.TrimSuffix(quality, "p")
 	if _, err := strconv.Atoi(height); err == nil {

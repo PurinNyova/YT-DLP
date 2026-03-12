@@ -40,7 +40,7 @@ func generateUUID() string {
 	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
-// GetInfo handles GET /api/info?url=<youtube_url>
+// GetInfo handles GET /api/info?url=<url>&platform=<platform>
 func (h *Handler) GetInfo(c *gin.Context) {
 	url := c.Query("url")
 	if url == "" {
@@ -48,7 +48,13 @@ func (h *Handler) GetInfo(c *gin.Context) {
 		return
 	}
 
-	info, err := h.Service.FetchInfo(url)
+	platform := c.DefaultQuery("platform", "youtube")
+	if err := models.ValidateURL(url, platform); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	info, err := h.Service.FetchInfo(url, platform)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -61,6 +67,14 @@ func (h *Handler) GetInfo(c *gin.Context) {
 func (h *Handler) StartDownload(c *gin.Context) {
 	var req models.DownloadRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.Platform == "" {
+		req.Platform = "youtube"
+	}
+	if err := models.ValidateURL(req.URL, req.Platform); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
