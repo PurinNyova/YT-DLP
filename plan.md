@@ -176,6 +176,18 @@ A sleek, modern web application that leverages **yt-dlp** to download YouTube vi
 
 ---
 
+## SEO Improvements
+
+- [x] Update title and meta descriptions to explicitly advertise multi-platform support (YouTube, Instagram, X/Twitter, TikTok).
+- [x] Add a `<link rel="canonical" href="https://ytdl.purinnyova.com/" />` tag to avoid duplicate content penalties.
+- [x] Generate and serve `robots.txt` and `sitemap.xml` directly from the `public/` directory for better crawler discoverability.
+- [x] Add `<meta name="robots" content="index, follow" />` tag.
+- [x] Implement JSON-LD Structured Data (e.g., `WebSite` or `SoftwareApplication`) in the `<head>` to enable rich search snippets.
+- [x] Add iOS-specific icons, such as `<link rel="apple-touch-icon" href="/apple-touch-icon.png" />`.
+- [ ] Consider prerendering (SSG) or Server-Side Rendering (SSR) for the React SPA to guarantee that crawlers without JavaScript execution can read the content.
+
+---
+
 ## Milestones
 
 1. **Scaffolding** — Repo, Go module, React app, DB schema
