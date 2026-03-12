@@ -170,6 +170,8 @@ export default function HomePage({ platform = 'youtube' }) {
                   exit={{ y: -20, opacity: 0 }}
                   transition={{ duration: 0.3 }}
                   display="inline-block"
+                  bgGradient="linear(to-r, brand.400, pink.400, purple.400)"
+                  bgClip="text"
                 >
                   {platformInfo.name}
                 </MotionBox>
