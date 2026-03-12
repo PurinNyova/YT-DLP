@@ -1,9 +1,19 @@
-import { Box, Container, Flex, Heading, HStack, Link as ChakraLink } from '@chakra-ui/react';
-import { Link, useLocation } from 'react-router-dom';
+import { Box, Container, Flex, Heading, HStack, IconButton, Link as ChakraLink, Tooltip } from '@chakra-ui/react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiDownload, FiClock } from 'react-icons/fi';
+import { FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
-export default function Navbar() {
+const platformIcons = [
+  { key: 'youtube', icon: FaYoutube, label: 'YouTube', color: '#FF0000' },
+  { key: 'instagram', icon: FaInstagram, label: 'Instagram', color: '#E4405F' },
+  { key: 'x', icon: FaXTwitter, label: 'X (Twitter)', color: '#FFFFFF' },
+  { key: 'tiktok', icon: FaTiktok, label: 'TikTok', color: '#00F2EA' },
+];
+
+export default function Navbar({ platform, setPlatform }) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLink = (to, label, icon) => {
     const isActive = location.pathname === to;
@@ -58,6 +68,28 @@ export default function Navbar() {
               Nyova Downloader
             </Heading>
           </ChakraLink>
+
+          {/* Platform selector icons */}
+          <HStack spacing={1}>
+            {platformIcons.map((p) => (
+              <Tooltip key={p.key} label={p.label} fontSize="xs" hasArrow>
+                <IconButton
+                  aria-label={p.label}
+                  icon={<Box as={p.icon} boxSize="18px" />}
+                  variant="ghost"
+                  size="sm"
+                  color={platform === p.key ? p.color : 'gray.500'}
+                  bg={platform === p.key ? 'whiteAlpha.150' : 'transparent'}
+                  _hover={{ color: p.color, bg: 'whiteAlpha.100' }}
+                  transition="all 0.2s"
+                  onClick={() => {
+                    setPlatform(p.key);
+                    if (location.pathname !== '/') navigate('/');
+                  }}
+                />
+              </Tooltip>
+            ))}
+          </HStack>
 
           <HStack spacing={2}>
             {navLink('/', 'Download', FiDownload)}
